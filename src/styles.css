@@ -1,0 +1,612 @@
+:root {
+  --bg: #0d1530;
+  --felt-1: #1f3a73;
+  --felt-2: #142a58;
+  --line: #34508f;
+  --ink: #f1ede2;
+  --muted: #9fb0d6;
+  --face: #fbf6ea;
+  --red: #b8283a;
+  --black: #1a1b24;
+  --saffron: #f2b134;
+  --turq: #43c0b4;
+  --cw: 64px;
+  --ch: 92px;
+  --sm-w: 44px;
+  --display: "Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(120% 70% at 50% -10%, #223a78 0%, transparent 60%),
+    linear-gradient(45deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size:
+    auto,
+    30px 30px,
+    30px 30px;
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--saffron);
+  outline-offset: 2px;
+}
+
+/* ---------- Kartalar ---------- */
+
+.card {
+  position: relative;
+  flex: none;
+  display: block;
+  width: var(--cw);
+  height: var(--ch);
+  padding: 0;
+  border: 1px solid rgba(20, 16, 10, 0.35);
+  border-radius: 9px;
+  background: var(--face);
+  font-family: var(--display);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 3px 8px rgba(0, 0, 0, 0.4);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+  cursor: default;
+}
+
+.card:disabled {
+  opacity: 1;
+}
+
+.card.red {
+  color: var(--red);
+}
+
+.card.black {
+  color: var(--black);
+}
+
+.card .corner {
+  position: absolute;
+  top: 5px;
+  left: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: calc(var(--cw) * 0.28);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.card .corner.br {
+  top: auto;
+  left: auto;
+  right: 6px;
+  bottom: 5px;
+  transform: rotate(180deg);
+}
+
+.card .center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: calc(var(--cw) * 0.56);
+  line-height: 1;
+}
+
+.card.ace .center {
+  font-size: calc(var(--cw) * 0.72);
+}
+
+.card.back {
+  border-color: #0a1230;
+  background-color: #2a4690;
+  background-image:
+    linear-gradient(45deg, rgba(242, 177, 52, 0.55) 1px, transparent 1px),
+    linear-gradient(-45deg, rgba(242, 177, 52, 0.55) 1px, transparent 1px);
+  background-size: 9px 9px;
+  box-shadow:
+    inset 0 0 0 3px var(--face),
+    inset 0 0 0 4px #2a4690,
+    0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+.card.small {
+  --cw: var(--sm-w);
+  --ch: calc(var(--sm-w) * 1.43);
+  border-radius: 7px;
+}
+
+.card.small .corner {
+  top: 3px;
+  left: 4px;
+}
+
+.card.small .corner.br {
+  top: auto;
+  left: auto;
+  right: 4px;
+  bottom: 3px;
+}
+
+.card.playable {
+  cursor: pointer;
+  transform: translateY(-12px);
+  box-shadow:
+    0 0 0 2px var(--saffron),
+    0 8px 14px rgba(0, 0, 0, 0.45);
+}
+
+.card.playable:hover {
+  transform: translateY(-18px);
+}
+
+.card.selected {
+  transform: translateY(-24px);
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 5px var(--saffron),
+    0 10px 16px rgba(0, 0, 0, 0.5);
+}
+
+.card.target {
+  cursor: pointer;
+  box-shadow:
+    0 0 0 3px var(--turq),
+    0 0 16px 3px rgba(67, 192, 180, 0.65);
+}
+
+.hand .card:not(.playable):not(.selected) {
+  filter: brightness(0.78) saturate(0.85);
+}
+
+/* ---------- Yelpig'ich (qo'l) ---------- */
+
+.hand,
+.fan {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  max-width: 100%;
+}
+
+.fan {
+  --cw: var(--sm-w);
+  align-items: flex-start;
+  min-height: calc(var(--sm-w) * 1.43);
+}
+
+.slot {
+  position: relative;
+  flex: none;
+  transform: translateY(var(--drop, 0px)) rotate(var(--rot, 0deg));
+  transform-origin: 50% 140%;
+}
+
+.fan .slot {
+  transform-origin: 50% -40%;
+}
+
+.slot + .slot {
+  margin-left: calc(var(--cw) * var(--lap, 0.2) * -1);
+}
+
+.slot:hover,
+.slot:focus-within {
+  z-index: 5;
+}
+
+/* ---------- Lobby ---------- */
+
+.lobby {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: calc(var(--ch) + 28px);
+  margin-bottom: 8px;
+}
+
+.hero .card {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  margin-left: calc(var(--cw) / -2);
+  transform: translateX(var(--x, 0px)) rotate(var(--r, 0deg));
+  transform-origin: 50% 130%;
+}
+
+.lobby h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(48px, 14vw, 84px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.sub {
+  margin: 0 0 10px;
+  max-width: 30ch;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.linkbox {
+  display: flex;
+  gap: 8px;
+  width: min(520px, 100%);
+}
+
+.linkbox input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--felt-2);
+  color: var(--ink);
+  font: inherit;
+}
+
+.btn {
+  padding: 12px 22px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--felt-2);
+  color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    filter 0.15s ease,
+    transform 0.1s ease;
+}
+
+.btn.primary {
+  border-color: var(--saffron);
+  background: var(--saffron);
+  color: #2a1d03;
+}
+
+.btn:hover {
+  filter: brightness(1.12);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.notice {
+  margin: 0;
+  color: var(--saffron);
+}
+
+/* ---------- O'yin stoli ---------- */
+
+.game {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  gap: 10px;
+  padding: calc(12px + env(safe-area-inset-top)) 12px
+    calc(12px + env(safe-area-inset-bottom));
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.seat {
+  text-align: center;
+}
+
+.opponent {
+  padding-bottom: 6px;
+}
+
+.who {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.role {
+  padding: 2px 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.role.atk {
+  border-color: rgba(224, 88, 106, 0.6);
+  background: rgba(184, 40, 58, 0.25);
+  color: #ffb3bc;
+}
+
+.role.def {
+  border-color: rgba(67, 192, 180, 0.6);
+  background: rgba(67, 192, 180, 0.18);
+  color: #a5ece4;
+}
+
+.seat.active .who {
+  color: var(--ink);
+}
+
+.seat.active .role {
+  box-shadow: 0 0 0 3px rgba(242, 177, 52, 0.4);
+}
+
+.middle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 200px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: radial-gradient(
+    90% 120% at 50% 40%,
+    var(--felt-1),
+    var(--felt-2)
+  );
+  box-shadow:
+    inset 0 0 0 6px rgba(0, 0, 0, 0.12),
+    inset 0 0 0 7px rgba(255, 255, 255, 0.06),
+    0 14px 30px rgba(0, 0, 0, 0.35);
+}
+
+.deck {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 92px;
+}
+
+.stack {
+  position: relative;
+  width: 92px;
+  height: calc(var(--sm-w) * 1.43 + 1px);
+}
+
+.stack .card {
+  position: absolute;
+  top: 0;
+}
+
+.stack .trumpcard {
+  left: 30px;
+  transform: rotate(90deg);
+}
+
+.stack .card.back {
+  left: 0;
+}
+
+.trumponly {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-family: var(--display);
+  font-size: 44px;
+  line-height: 1;
+}
+
+.trumponly.red,
+.suit.red {
+  color: #ff7b86;
+}
+
+.trump-label {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.trump-label .suit {
+  font-size: 20px;
+  vertical-align: -2px;
+}
+
+.table {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 12px 14px;
+}
+
+.table.empty {
+  align-items: center;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.pair {
+  position: relative;
+  width: calc(var(--cw) + 22px);
+  height: calc(var(--ch) + 16px);
+  animation: drop-in 0.22s ease-out both;
+}
+
+.pair .def {
+  position: absolute;
+  top: 16px;
+  left: 22px;
+  transform: rotate(6deg);
+  animation: cover-in 0.22s ease-out both;
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cover-in {
+  from {
+    opacity: 0;
+    transform: translate(-8px, -14px) rotate(0deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(6deg);
+  }
+}
+
+/* ---------- Boshqaruv ---------- */
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.status {
+  margin: 0;
+  max-width: 100%;
+  padding: 9px 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.status.go {
+  border-color: var(--saffron);
+  background: rgba(242, 177, 52, 0.14);
+  color: #ffe2a3;
+}
+
+.status.win {
+  border-color: var(--turq);
+  background: rgba(67, 192, 180, 0.16);
+  color: #aef0e9;
+}
+
+.status.lose {
+  border-color: #e0586a;
+  background: rgba(184, 40, 58, 0.2);
+  color: #ffc1c8;
+}
+
+.status.draw {
+  border-color: var(--muted);
+}
+
+.controls .notice {
+  font-size: 14px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+}
+
+.mine .hand {
+  padding-top: 26px;
+  padding-bottom: 10px;
+}
+
+/* ---------- Telefon ---------- */
+
+@media (max-width: 560px) {
+  :root {
+    --cw: 54px;
+    --ch: 78px;
+    --sm-w: 38px;
+  }
+
+  .middle {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    min-height: 0;
+    padding: 12px;
+  }
+
+  .deck {
+    flex-direction: row;
+    align-self: flex-start;
+    width: auto;
+    gap: 12px;
+  }
+
+  .pair {
+    width: calc(var(--cw) + 16px);
+  }
+
+  .pair .def {
+    left: 16px;
+  }
+
+  .status {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 400px) {
+  :root {
+    --cw: 48px;
+    --ch: 70px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
