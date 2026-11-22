@@ -1,14 +1,30 @@
 import Peer, { type DataConnection } from "peerjs";
 import type { Message } from "../types";
 
-const PEER_OPTS = {
-  config: {
-    iceServers: [
-      { urls: "stun:stun.l.google.com:19302" },
-      { urls: "stun:stun1.l.google.com:19302" },
+const TURN_USER = import.meta.env.VITE_TURN_USERNAME as string | undefined;
+const TURN_PASS = import.meta.env.VITE_TURN_CREDENTIAL as string | undefined;
+
+const iceServers: RTCIceServer[] = [
+  { urls: "stun:stun.relay.metered.ca:80" },
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" },
+];
+
+// Kalit berilgan bo'lsagina TURN qo'shiladi (bo'lmasa faqat STUN bilan ishlaydi)
+if (TURN_USER && TURN_PASS) {
+  iceServers.push({
+    urls: [
+      "turn:global.relay.metered.ca:80",
+      "turn:global.relay.metered.ca:80?transport=tcp",
+      "turn:global.relay.metered.ca:443",
+      "turns:global.relay.metered.ca:443?transport=tcp",
     ],
-  },
-};
+    username: TURN_USER,
+    credential: TURN_PASS,
+  });
+}
+
+const PEER_OPTS = { config: { iceServers } };
 
 export interface Link {
   send(msg: Message): void;
